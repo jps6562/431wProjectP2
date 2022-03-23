@@ -38,7 +38,7 @@ def userExist(username, password):
     #print(rowsReturned[0][0])
     #print(type(rowsReturned[0][0]))
     db.close()
-    if rowsReturned[0][0] == 1:
+    if rowsReturned[0][0] > 0:
         return True
     else:
         return False
