@@ -1,17 +1,47 @@
 import hashlib
 
 import pandas
-from flask import Flask
+from flask import Flask, render_template, request
 import sqlite3 as sql
 import pandas as pd
 app = Flask(__name__)
 host = 'http://127.0.0.1:5000/'
 
+
 @app.route('/')
 def mainPage():  # put application's code here
+    popData()
+    return render_template('mainPage.html')
 
-    return popData()
+#add webpage
+@app.route('/login', methods=['POST', 'GET'])
+def login():
+    error = None
+    if request.method == 'POST':
+        #popData()
+        userName = request.form['UserName']
+        password = request.form['Password']
+        result = userExist(userName, password)
+        if result:
+            return render_template('successfulLogin.html', error=error, result=result)
+        else:
+            return render_template('unSuccLogin.html', error=error, result=result)
+    return render_template('loginPage.html')
 
+
+
+
+def userExist(username, password):
+    db = sql.connect('Phase2.db')
+    hashPassword = hashPass(password)
+    rowsReturned = db.execute('SELECT COUNT(*) FROM Users WHERE (email, password) = (?,?) ;', (username, hashPassword)).fetchall()
+    #print(rowsReturned[0][0])
+    #print(type(rowsReturned[0][0]))
+    db.close()
+    if rowsReturned[0][0] == 1:
+        return True
+    else:
+        return False
 
 def popData():
     db = sql.connect('Phase2.db')
@@ -94,6 +124,8 @@ def popData():
     inData.columns = inData.columns.str.replace(" ", "")
     inData.to_sql("Rating", db, if_exists='replace', index=False)
 
+    db.commit()
+    db.close()
     #cursor = db.execute('SELECT * FROM Users e;')
     #for i in cursor.fetchall():
         #print(i)
