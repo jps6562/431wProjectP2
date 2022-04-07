@@ -13,7 +13,8 @@ def mainPage():  # put application's code here
     popData()
     return render_template('mainPage.html')
 
-#add webpage
+
+
 @app.route('/login', methods=['POST', 'GET'])
 def login():
     error = None
@@ -28,6 +29,7 @@ def login():
             return render_template('unSuccLogin.html', error=error, result=result)
     return render_template('loginPage.html')
 
+@app.route('/UserInfo', methods=['POST', 'GET'])
 
 
 
