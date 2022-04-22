@@ -30,6 +30,10 @@ def login():
     return render_template('loginPage.html')
 
 @app.route('/UserInfo', methods=['POST', 'GET'])
+def userInfo():
+    error = None
+    #if request.method == 'POST':
+    return render_template('UserInfo.html')
 
 
 
