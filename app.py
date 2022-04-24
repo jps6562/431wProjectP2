@@ -120,7 +120,7 @@ def categoryExists(category):
 
 def getNextListingId():
     db = sql.connect('Phase2.db')
-    cursor = db.execute('SELECT MAX(p.Listing_ID) FROM Product_Listings')
+    cursor = db.execute('SELECT MAX(p.Listing_ID) FROM Product_Listings p')
     listId = cursor.fetchone()[0]
     db.close()
     listId = listId + 1
