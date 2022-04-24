@@ -7,6 +7,7 @@ import pandas as pd
 app = Flask(__name__)
 host = 'http://127.0.0.1:5000/'
 
+currentUserNameGlobal = '0'
 
 @app.route('/')
 def mainPage():  # put application's code here
@@ -24,9 +25,11 @@ def login():
         password = request.form['Password']
         result = userExist(userName, password)
         if result:
+            global currentUserNameGlobal
+            currentUserNameGlobal = userName
             return render_template('successfulLogin.html', error=error, result=result)
         else:
-            return render_template('unSuccLogin.html', error=error, result=result)
+            return render_template('unSuccLogin.html', error=error)
     return render_template('loginPage.html')
 
 @app.route('/UserInfo', methods=['POST', 'GET'])
@@ -35,7 +38,31 @@ def userInfo():
     #if request.method == 'POST':
     return render_template('UserInfo.html')
 
+@app.route('/buyerPage',methods=['POST', 'GET'])
+def buyerPage():
+    error = None
+    return render_template('buyerPage.html', error=error, result=getFirstLastName(currentUserNameGlobal))
 
+@app.route('/sellerPage',methods=['POST', 'GET'])
+def sellerPage():
+    error = None
+    global currentUserNameGlobal
+    if sellerExist(currentUserNameGlobal):
+        return render_template('sellerPage.html', error=error, result=getFirstLastName(currentUserNameGlobal))
+    else:
+        return render_template('noSeller.html', error=error)
+
+
+def sellerExist(username):
+    db = sql.connect('Phase2.db')
+    rowsReturned = db.execute('SELECT COUNT(*) FROM Sellers WHERE email = ? ;', [username]).fetchall()
+    #print(rowsReturned[0][0])
+    #print(type(rowsReturned[0][0]))
+    db.close()
+    if rowsReturned[0][0] > 0:
+        return True
+    else:
+        return False
 
 def userExist(username, password):
     db = sql.connect('Phase2.db')
@@ -145,6 +172,14 @@ def hashInData(pandaIn: pandas.DataFrame):
 def hashPass(pw):
     return hashlib.sha256(pw.encode()).hexdigest()
 
+def getFirstLastName(username):
+    db = sql.connect('Phase2.db')
+    print(username)
+    cursor = db.execute('SELECT b.first_name, b.last_name from Buyers b where b.email = ?;', [username])
+    ret = cursor.fetchall()
+    db.close()
+    print(type(ret))
+    return ret
 
 if __name__ == '__main__':
     app.run()

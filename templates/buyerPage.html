@@ -4,19 +4,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
           integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-    <title>User Logged In</title>
+    <title>Buyer Page</title>
 </head>
-<head>
-    <meta charset="UTF-8">
-    <title>Successful Login</title>
-</head>
+<div class="card-body">
+        <h2 class="card-title">Welcome {{ result[0][0] }} {{ result[0][1] }}</h2>
+
+    </div>
 <body>
     <div class="container-sm">
         <div class="card-body">
-            <h2 style="color: chartreuse" class="card-title">Successful Login</h2>
-            <a class="btn btn-success" href="/" role="button">Go Back</a>
-            <a class="btn btn-success" href="/sellerPage" role="button">Enter as Seller</a>
-            <a class="btn btn-success" href="/buyerPage" role="button">Enter as Buyer</a>
+            <a class="btn btn-success" href="/login" role="button">Go Back</a>
+            <a class="btn btn-success" href="/checkInfo" role="button">Check Personal Info</a>
+            <a class="btn btn-success" href="/browseProducts" role="button">Browse Products</a>
+
         </div>
     </div>
     <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
