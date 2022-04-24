@@ -18,40 +18,56 @@
         </div>
         <div class="card-body">
         <h2 class="card-title">Personal Data</h2>
-        <table class="table table-dark">
-            <tr>
-                <th scope="col">Email</th>
-                <th scope="col">First Name</th>
-                <th scope="col">Last Name</th>
-                <th scope="col">Gender</th>
-                <th scope="col">Age</th>
-                <th scope="col">Home Zipcode</th>
-                <th scope="col">Home Street Number</th>
-                <th scope="col">Home Street Name</th>
-                <th scope="col">Bill Zipcode</th>
-                <th scope="col">Bill Street Number</th>
-                <th scope="col">Bill Street Name</th>
-                <th scope="col">Last four digits of Credit card</th>
-            </tr>
-            <tbody>
+            <table class="table table-dark">
                 <tr>
-                    <td> {{ result[0] }} </td>
-                    <td> {{ result[1] }} </td>
-                    <td> {{ result[2] }} </td>
-                    <td> {{ result[3] }} </td>
-                    <td> {{ result[4] }} </td>
-                    <td> {{ result[5] }} </td>
-                    <td> {{ result[6] }} </td>
-                    <td> {{ result[7] }} </td>
-                    <td> {{ result[8] }} </td>
-                    <td> {{ result[9] }} </td>
-                    <td> {{ result[10] }} </td>
-                    <td> {{ result[11] }} </td>
+                    <th scope="col">Email</th>
+                    <th scope="col">First Name</th>
+                    <th scope="col">Last Name</th>
+                    <th scope="col">Gender</th>
+                    <th scope="col">Age</th>
+                    <th scope="col">Home Zipcode</th>
+                    <th scope="col">Home Street Number</th>
+                    <th scope="col">Home Street Name</th>
+                    <th scope="col">Bill Zipcode</th>
+                    <th scope="col">Bill Street Number</th>
+                    <th scope="col">Bill Street Name</th>
+                    <th scope="col">Last four digits of Credit card</th>
                 </tr>
-            </tbody>
-        </table>
+                <tbody>
+                    <tr>
+                        <td> {{ result[0] }} </td>
+                        <td> {{ result[1] }} </td>
+                        <td> {{ result[2] }} </td>
+                        <td> {{ result[3] }} </td>
+                        <td> {{ result[4] }} </td>
+                        <td> {{ result[5] }} </td>
+                        <td> {{ result[6] }} </td>
+                        <td> {{ result[7] }} </td>
+                        <td> {{ result[8] }} </td>
+                        <td> {{ result[9] }} </td>
+                        <td> {{ result[10] }} </td>
+                        <td> {{ result[11] }} </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="card-body">
+        <h2 class="card-title">Change Password</h2>
+        <form action="/UserInfo" method="POST">
+            <div class="form-group">
+                <label for="newPassword">New Password</label>
+                <input type="password" name="newPassword" required class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="reNewPassword">Re-Enter Password</label>
+                <input type="password" name="renewPassword" required class="form-control">
+            </div>
+            <button type="submit" class="btn btn-primary">Enter</button>
+            <a class="btn btn-success" href="/buyerPage" role="button">Go Back</a>
+        </form>
+        </div>
     </div>
-    </div>
+
     <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
             integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
             crossorigin="anonymous"></script>

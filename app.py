@@ -40,8 +40,10 @@ def userInfo():
     print(type(result))
     print(result)
     #result = [['arubertelli0@nsu.edu'],['Ileana']]
-    #if request.method == 'POST':
-    return render_template('UserInfo.html', error=error, result=result)
+    if request.method == 'POST':
+
+    else:
+        return render_template('UserInfo.html', error=error, result=result)
 
 @app.route('/buyerPage',methods=['POST', 'GET'])
 def buyerPage():
