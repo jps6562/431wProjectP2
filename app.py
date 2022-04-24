@@ -35,8 +35,10 @@ def login():
 @app.route('/UserInfo', methods=['POST', 'GET'])
 def userInfo():
     error = None
+    global currentUserNameGlobal
+    result = getPersonalInfo(currentUserNameGlobal)
     #if request.method == 'POST':
-    return render_template('UserInfo.html')
+    return render_template('UserInfo.html', error=error, result=result)
 
 @app.route('/buyerPage',methods=['POST', 'GET'])
 def buyerPage():
@@ -52,6 +54,23 @@ def sellerPage():
     else:
         return render_template('noSeller.html', error=error)
 
+def getPersonalInfo(username):
+    db = sql.connect('Phase2.db')
+    cursor = db.execute('SELECT * from Buyers b where b.email = ?;', [username])
+    fetchAllReturn = cursor.fetchall()[0]
+    ret = []
+    for i in range(5):
+        ret.append(fetchAllReturn[i])
+    homeAddrID = fetchAllReturn[5]
+    billingAddrID = fetchAllReturn[6]
+    cursor = db.execute('SELECT a.zipcode, a.street_num, a.street_name from Address a where a.address_id = ?;',
+                        [homeAddrID])
+    homeAddressFetch = cursor.fetchall()[0]
+    cursor = db.execute('SELECT a.zipcode, a.street_num, a.street_name from Address a where a.address_id = ?;',
+                        [billingAddrID])
+    billAddressFetch = cursor.fetchall()[0]
+
+    db.close()
 
 def sellerExist(username):
     db = sql.connect('Phase2.db')
