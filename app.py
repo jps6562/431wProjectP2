@@ -37,8 +37,11 @@ def userInfo():
     error = None
     global currentUserNameGlobal
     result = getPersonalInfo(currentUserNameGlobal)
+    print(type(result))
+    print(result)
+    print(len(result[0]))
     #if request.method == 'POST':
-    return render_template('UserInfo.html', error=error, result=result)
+    return render_template('UserInfo.html', error=error, result=result[0])
 
 @app.route('/buyerPage',methods=['POST', 'GET'])
 def buyerPage():
@@ -54,6 +57,8 @@ def sellerPage():
     else:
         return render_template('noSeller.html', error=error)
 
+# returns a tuple with [email, first_name, last_name, gender, age, home_zipcode, home_street_num, home_street_name,
+# bill_zipcode, bill_street_num, bill_street_name, last four digits of cc]
 def getPersonalInfo(username):
     db = sql.connect('Phase2.db')
     cursor = db.execute('SELECT * from Buyers b where b.email = ?;', [username])
@@ -63,20 +68,37 @@ def getPersonalInfo(username):
         ret.append(fetchAllReturn[i])
     homeAddrID = fetchAllReturn[5]
     billingAddrID = fetchAllReturn[6]
+
     cursor = db.execute('SELECT a.zipcode, a.street_num, a.street_name from Address a where a.address_id = ?;',
                         [homeAddrID])
     homeAddressFetch = cursor.fetchall()[0]
+    for thing in homeAddressFetch:
+        ret.append(thing)
+
     cursor = db.execute('SELECT a.zipcode, a.street_num, a.street_name from Address a where a.address_id = ?;',
                         [billingAddrID])
     billAddressFetch = cursor.fetchall()[0]
-
+    for thing in billAddressFetch:
+        ret.append(thing)
     db.close()
+    ret.append(getCCNum(username)[-4:])
+    ret_tuple = tuple(ret)
+    ret_strings=[]
+    for thing in ret:
+        ret_strings.append(str(thing))
+    return ret_strings
+
+
+def getCCNum(username):
+    db = sql.connect('Phase2.db')
+    cursor = db.execute('Select c.credit_card_num from Credit_Cards c where c.Owner_email = ?;', [username])
+    ret = cursor.fetchall()[0][0]
+    db.close()
+    return ret
 
 def sellerExist(username):
     db = sql.connect('Phase2.db')
     rowsReturned = db.execute('SELECT COUNT(*) FROM Sellers WHERE email = ? ;', [username]).fetchall()
-    #print(rowsReturned[0][0])
-    #print(type(rowsReturned[0][0]))
     db.close()
     if rowsReturned[0][0] > 0:
         return True
@@ -87,8 +109,6 @@ def userExist(username, password):
     db = sql.connect('Phase2.db')
     hashPassword = hashPass(password)
     rowsReturned = db.execute('SELECT COUNT(*) FROM Users WHERE (email, password) = (?,?) ;', (username, hashPassword)).fetchall()
-    #print(rowsReturned[0][0])
-    #print(type(rowsReturned[0][0]))
     db.close()
     if rowsReturned[0][0] > 0:
         return True
@@ -178,9 +198,7 @@ def popData():
 
     db.commit()
     db.close()
-    #cursor = db.execute('SELECT * FROM Users e;')
-    #for i in cursor.fetchall():
-        #print(i)
+
 
 #hashes the whole dataframe so for the population of data
 def hashInData(pandaIn: pandas.DataFrame):
@@ -193,11 +211,9 @@ def hashPass(pw):
 
 def getFirstLastName(username):
     db = sql.connect('Phase2.db')
-    print(username)
     cursor = db.execute('SELECT b.first_name, b.last_name from Buyers b where b.email = ?;', [username])
     ret = cursor.fetchall()
     db.close()
-    print(type(ret))
     return ret
 
 if __name__ == '__main__':
