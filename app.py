@@ -37,11 +37,22 @@ def userInfo():
     error = None
     global currentUserNameGlobal
     result = getPersonalInfo(currentUserNameGlobal)
-    print(type(result))
-    print(result)
+    #print(type(result))
+    #print(result)
     #result = [['arubertelli0@nsu.edu'],['Ileana']]
     if request.method == 'POST':
-
+        newPassword = request.form['newPassword']
+        reNewPassword = request.form['reNewPassword']
+        if newPassword == reNewPassword:
+            db = sql.connect('Phase2.db')
+            hashedPw = hashPass(newPassword)
+            #print(hashedPw)
+            db.execute('UPDATE Users SET password = ? WHERE email = ?;', (hashedPw, currentUserNameGlobal))
+            db.commit()
+            db.close()
+            return render_template('pwChangeSucc.html', error=error)
+        else:
+            return render_template('pwChangeUnSucc.html', error=error)
     else:
         return render_template('UserInfo.html', error=error, result=result)
 
