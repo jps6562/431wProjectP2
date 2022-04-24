@@ -4,10 +4,12 @@ import pandas
 from flask import Flask, render_template, request
 import sqlite3 as sql
 import pandas as pd
+
 app = Flask(__name__)
 host = 'http://127.0.0.1:5000/'
 
 currentUserNameGlobal = '0'
+
 
 @app.route('/')
 def mainPage():  # put application's code here
@@ -15,12 +17,11 @@ def mainPage():  # put application's code here
     return render_template('mainPage.html')
 
 
-
 @app.route('/login', methods=['POST', 'GET'])
 def login():
     error = None
     if request.method == 'POST':
-        #popData()
+        # popData()
         userName = request.form['UserName']
         password = request.form['Password']
         result = userExist(userName, password)
@@ -32,21 +33,22 @@ def login():
             return render_template('unSuccLogin.html', error=error)
     return render_template('loginPage.html')
 
+
 @app.route('/UserInfo', methods=['POST', 'GET'])
 def userInfo():
     error = None
     global currentUserNameGlobal
     result = getPersonalInfo(currentUserNameGlobal)
-    #print(type(result))
-    #print(result)
-    #result = [['arubertelli0@nsu.edu'],['Ileana']]
+    # print(type(result))
+    # print(result)
+    # result = [['arubertelli0@nsu.edu'],['Ileana']]
     if request.method == 'POST':
         newPassword = request.form['newPassword']
         reNewPassword = request.form['reNewPassword']
         if newPassword == reNewPassword:
             db = sql.connect('Phase2.db')
             hashedPw = hashPass(newPassword)
-            #print(hashedPw)
+            # print(hashedPw)
             db.execute('UPDATE Users SET password = ? WHERE email = ?;', (hashedPw, currentUserNameGlobal))
             db.commit()
             db.close()
@@ -56,12 +58,14 @@ def userInfo():
     else:
         return render_template('UserInfo.html', error=error, result=result)
 
-@app.route('/buyerPage',methods=['POST', 'GET'])
+
+@app.route('/buyerPage', methods=['POST', 'GET'])
 def buyerPage():
     error = None
     return render_template('buyerPage.html', error=error, result=getFirstLastName(currentUserNameGlobal))
 
-@app.route('/sellerPage',methods=['POST', 'GET'])
+
+@app.route('/sellerPage', methods=['POST', 'GET'])
 def sellerPage():
     error = None
     global currentUserNameGlobal
@@ -69,6 +73,59 @@ def sellerPage():
         return render_template('sellerPage.html', error=error, result=getFirstLastName(currentUserNameGlobal))
     else:
         return render_template('noSeller.html', error=error)
+
+
+@app.route('/productList', methods=['POST', 'GET'])
+def productList():
+    error = None
+    if request.method == 'POST':
+        title = request.form['title']
+        productName = request.form['productName']
+        category = request.form['category']
+        productDesc = request.form['productDesc']
+        price = request.form['price']
+        quantity = request.form['quantity']
+        global currentUserNameGlobal
+        sellerEmail = currentUserNameGlobal
+        listingId = getNextListingId()
+        if categoryExists(category):
+            db = sql.connect('Phase2.db')
+            cursor = db.execute('INSERT INTO Product_Listings (Seller_Email, Listing_ID, Category, Title, Product_Name,'
+                                ' Product_Description, Price, Quantity) VALUES (?,?,?,?,?,?,?,?);',
+                                (sellerEmail, listingId,
+                                 category, title,
+                                 productName,
+                                 productDesc, price,
+                                 quantity))
+            db.commit()
+            db.close()
+            return render_template('succProdList.html', error=error)
+        else:
+            return render_template('unSuccProdList.html', error=error)
+    else:
+        return render_template('productList.html', error=error)
+
+
+def categoryExists(category):
+    db = sql.connect('Phase2.db')
+    cursor = db.execute('SELECT COUNT(*) from Categories c where c.category_name = ? OR c.parent_category = ?;',
+                        (category, category))
+    count = cursor.fetchone()[0]
+    db.close()
+    if count > 0:
+        return True
+    else:
+        return False
+
+
+def getNextListingId():
+    db = sql.connect('Phase2.db')
+    cursor = db.execute('SELECT MAX(p.Listing_ID) FROM Product_Listings')
+    listId = cursor.fetchone()[0]
+    db.close()
+    listId = listId + 1
+    return listId
+
 
 # returns a tuple with [email, first_name, last_name, gender, age, home_zipcode, home_street_num, home_street_name,
 # bill_zipcode, bill_street_num, bill_street_name, last four digits of cc]
@@ -106,6 +163,7 @@ def getCCNum(username):
     db.close()
     return ret
 
+
 def sellerExist(username):
     db = sql.connect('Phase2.db')
     rowsReturned = db.execute('SELECT COUNT(*) FROM Sellers WHERE email = ? ;', [username]).fetchall()
@@ -115,34 +173,38 @@ def sellerExist(username):
     else:
         return False
 
+
 def userExist(username, password):
     db = sql.connect('Phase2.db')
     hashPassword = hashPass(password)
-    rowsReturned = db.execute('SELECT COUNT(*) FROM Users WHERE (email, password) = (?,?) ;', (username, hashPassword)).fetchall()
+    rowsReturned = db.execute('SELECT COUNT(*) FROM Users WHERE (email, password) = (?,?) ;',
+                              (username, hashPassword)).fetchall()
     db.close()
     if rowsReturned[0][0] > 0:
         return True
     else:
         return False
 
+
 def popData():
     db = sql.connect('Phase2.db')
 
-    #USERS TABLE
+    # USERS TABLE
     db.execute('CREATE TABLE IF NOT EXISTS Users("email" TEXT PRIMARY KEY, "password" TEXT);')
     inData = pd.read_csv('NittanyMarketDataset-Final/Users.csv')
-    inData.columns = inData.columns.str.replace(" ","")
+    inData.columns = inData.columns.str.replace(" ", "")
     hashedData = hashInData(inData)
-    hashedData.to_sql("Users", db, if_exists='replace',index=False)
+    hashedData.to_sql("Users", db, if_exists='replace', index=False)
 
-    #Buyers Table
-    db.execute('CREATE TABLE IF NOT EXISTS Buyers("email" TEXT PRIMARY KEY, "first_name" TEXT, "last_name" TEXT, "gender" TEXT,'
-               ' "age" INTEGER, home_address_id TEXT, billing_address_id TEXT );')
+    # Buyers Table
+    db.execute(
+        'CREATE TABLE IF NOT EXISTS Buyers("email" TEXT PRIMARY KEY, "first_name" TEXT, "last_name" TEXT, "gender" TEXT,'
+        ' "age" INTEGER, home_address_id TEXT, billing_address_id TEXT );')
     inData = pd.read_csv('NittanyMarketDataset-Final/Buyers.csv')
     inData.columns = inData.columns.str.replace(" ", "")
     inData.to_sql("Buyers", db, if_exists='replace', index=False)
 
-    #CC Table
+    # CC Table
     db.execute('CREATE TABLE IF NOT EXISTS Credit_Cards("credit_card_num" TEXT PRIMARY KEY, "card_code" INTEGER,'
                ' "expire_month" INTEGER , "expire_year" INTEGER, "card_type" TEXT, "owner_email" TEXT,'
                ' FOREIGN KEY("owner_email") REFERENCES "Users" ("email"));')
@@ -150,9 +212,10 @@ def popData():
     inData.columns = inData.columns.str.replace(" ", "")
     inData.to_sql("Credit_Cards", db, if_exists='replace', index=False)
 
-    #Address Table
-    db.execute('CREATE TABLE IF NOT EXISTS Address("address_ID" TEXT PRIMARY KEY, "zipcode" INTEGER, "street_num" INTEGER,'
-               ' "street_name" TEXT);')
+    # Address Table
+    db.execute(
+        'CREATE TABLE IF NOT EXISTS Address("address_ID" TEXT PRIMARY KEY, "zipcode" INTEGER, "street_num" INTEGER,'
+        ' "street_name" TEXT);')
     inData = pd.read_csv('NittanyMarketDataset-Final/Address.csv')
     inData.columns = inData.columns.str.replace(" ", "")
     inData.to_sql("Address", db, if_exists='replace', index=False)
@@ -163,8 +226,9 @@ def popData():
     inData.columns = inData.columns.str.replace(" ", "")
     inData.to_sql("Zipcode_Info", db, if_exists='replace', index=False)
 
-    db.execute('CREATE TABLE IF NOT EXISTS Sellers("email" TEXT PRIMARY KEY, "routing_number" TEXT, "account_number" INTEGER,'
-               ' "balance" REAL);')
+    db.execute(
+        'CREATE TABLE IF NOT EXISTS Sellers("email" TEXT PRIMARY KEY, "routing_number" TEXT, "account_number" INTEGER,'
+        ' "balance" REAL);')
     inData = pd.read_csv('NittanyMarketDataset-Final/Sellers.csv')
     inData.columns = inData.columns.str.replace(" ", "")
     inData.to_sql("Sellers", db, if_exists='replace', index=False)
@@ -188,8 +252,9 @@ def popData():
     inData.columns = inData.columns.str.replace(" ", "")
     inData.to_sql("Product_Listings", db, if_exists='replace', index=False)
 
-    db.execute('CREATE TABLE IF NOT EXISTS Orders("Transaction_ID" INTEGER PRIMARY KEY, "Seller_Email" TEXT, "Listing_ID" INTEGER,'
-               ' "Buyer_Email" TEXT, "Date" TEXT, "Quantity" INTEGER, "Payment" INTEGER);')
+    db.execute(
+        'CREATE TABLE IF NOT EXISTS Orders("Transaction_ID" INTEGER PRIMARY KEY, "Seller_Email" TEXT, "Listing_ID" INTEGER,'
+        ' "Buyer_Email" TEXT, "Date" TEXT, "Quantity" INTEGER, "Payment" INTEGER);')
     inData = pd.read_csv('NittanyMarketDataset-Final/Orders.csv')
     inData.columns = inData.columns.str.replace(" ", "")
     inData.to_sql("Orders", db, if_exists='replace', index=False)
@@ -210,14 +275,16 @@ def popData():
     db.close()
 
 
-#hashes the whole dataframe so for the population of data
+# hashes the whole dataframe so for the population of data
 def hashInData(pandaIn: pandas.DataFrame):
     pandaIn['password'] = pandaIn['password'].apply(lambda pw: hashPass(pw))
     return pandaIn
 
-#takes password and returns its hashed equivalent
+
+# takes password and returns its hashed equivalent
 def hashPass(pw):
     return hashlib.sha256(pw.encode()).hexdigest()
+
 
 def getFirstLastName(username):
     db = sql.connect('Phase2.db')
@@ -225,6 +292,7 @@ def getFirstLastName(username):
     ret = cursor.fetchall()
     db.close()
     return ret
+
 
 if __name__ == '__main__':
     app.run()
