@@ -39,9 +39,9 @@ def userInfo():
     result = getPersonalInfo(currentUserNameGlobal)
     print(type(result))
     print(result)
-    print(len(result[0]))
+    #result = [['arubertelli0@nsu.edu'],['Ileana']]
     #if request.method == 'POST':
-    return render_template('UserInfo.html', error=error, result=result[0])
+    return render_template('UserInfo.html', error=error, result=result)
 
 @app.route('/buyerPage',methods=['POST', 'GET'])
 def buyerPage():
@@ -83,10 +83,7 @@ def getPersonalInfo(username):
     db.close()
     ret.append(getCCNum(username)[-4:])
     ret_tuple = tuple(ret)
-    ret_strings=[]
-    for thing in ret:
-        ret_strings.append(str(thing))
-    return ret_strings
+    return ret
 
 
 def getCCNum(username):

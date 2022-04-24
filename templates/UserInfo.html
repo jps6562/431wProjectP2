@@ -34,23 +34,20 @@
                 <th scope="col">Last four digits of Credit card</th>
             </tr>
             <tbody>
-            {% for email, first_name, last_name, gender, age, home_zipcode, home_street_num, home_street_name,
-             bill_zipcode, bill_street_num, bill_street_name, cc in result %}
                 <tr>
-                    <td> {{ email }} </td>
-                    <td> {{ first_name }} </td>
-                    <td> {{ last_name }} </td>
-                    <td> {{ gender }} </td>
-                    <td> {{ age }} </td>
-                    <td> {{ home_zipcode }} </td>
-                    <td> {{ home_street_num }} </td>
-                    <td> {{ home_street_name }} </td>
-                    <td> {{ bill_zipcode }} </td>
-                    <td> {{ bill_street_num }} </td>
-                    <td> {{ bill_street_name }} </td>
-                    <td> {{ cc }} </td>
+                    <td> {{ result[0] }} </td>
+                    <td> {{ result[1] }} </td>
+                    <td> {{ result[2] }} </td>
+                    <td> {{ result[3] }} </td>
+                    <td> {{ result[4] }} </td>
+                    <td> {{ result[5] }} </td>
+                    <td> {{ result[6] }} </td>
+                    <td> {{ result[7] }} </td>
+                    <td> {{ result[8] }} </td>
+                    <td> {{ result[9] }} </td>
+                    <td> {{ result[10] }} </td>
+                    <td> {{ result[11] }} </td>
                 </tr>
-            {% endfor %}
             </tbody>
         </table>
     </div>
