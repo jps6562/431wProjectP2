@@ -15,6 +15,7 @@ currentUserNameGlobal = '0'
 @app.route('/')
 def mainPage():  # put application's code here
     popData()
+    print(len(getProductsInCategory('Cell Phones')))
     return render_template('mainPage.html')
 
 
@@ -105,6 +106,46 @@ def productList():
             return render_template('unSuccProdList.html', error=error)
     else:
         return render_template('productList.html', error=error)
+
+
+@app.route('/browseProducts', methods=['POST', 'GET'])
+def browseProducts():
+    error = None
+    result = getProductsInCategory(category)
+    return render_template('browseProducts.html', error=error, result=result)
+
+
+def getProductsInCategory(category):
+    cats = getCats(category)
+    db = sql.connect('Phase2.db')
+    productList = []
+    for cat in cats:
+        cursor = db.execute('SELECT p.Title, p.Product_Name, p.Product_Description, p.Price, p.Category, '
+                            'p.Seller_Email FROM Product_Listings p WHERE p.Category = ?;', [cat])
+        for thing in cursor.fetchall():
+            productList.append(thing)
+    db.close()
+    return productList
+
+def getCats(category):
+    cats = []
+    cats.append(category)
+    helperList = []
+    helperList.append(category)
+    db = sql.connect('Phase2.db')
+    while(len(helperList) > 0 ):
+        helperList = getSubCats(db, helperList)
+        cats = cats + helperList
+    db.close()
+    return cats
+
+def getSubCats(db, cats):
+    helperList = []
+    for cat in cats:
+        cursor = db.execute('SELECT c.category_name FROM Categories c WHERE c.parent_category = ?;', [cat])
+        for thing in cursor.fetchall():
+            helperList.append(thing[0])
+    return helperList
 
 
 def categoryExists(category):
@@ -273,7 +314,7 @@ def popData():
     inData.to_sql("Rating", db, if_exists='replace', index=False)
 
     db.execute('ALTER TABLE Product_Listings ADD COLUMN List_Date TEXT')
-    db.execute('UPDATE Product_Listings SET List_Date = ?;', [getCurrentDate()])
+    #db.execute('UPDATE Product_Listings SET List_Date = ?;', [getCurrentDate()])
     db.commit()
     db.close()
 
