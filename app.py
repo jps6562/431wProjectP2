@@ -4,6 +4,7 @@ import pandas
 from flask import Flask, render_template, request
 import sqlite3 as sql
 import pandas as pd
+import datetime
 
 app = Flask(__name__)
 host = 'http://127.0.0.1:5000/'
@@ -91,12 +92,12 @@ def productList():
         if categoryExists(category):
             db = sql.connect('Phase2.db')
             cursor = db.execute('INSERT INTO Product_Listings (Seller_Email, Listing_ID, Category, Title, Product_Name,'
-                                ' Product_Description, Price, Quantity) VALUES (?,?,?,?,?,?,?,?);',
+                                ' Product_Description, Price, Quantity, List_Date) VALUES (?,?,?,?,?,?,?,?,?);',
                                 (sellerEmail, listingId,
                                  category, title,
                                  productName,
                                  productDesc, price,
-                                 quantity))
+                                 quantity, getCurrentDate()))
             db.commit()
             db.close()
             return render_template('succProdList.html', error=error)
@@ -271,6 +272,8 @@ def popData():
     inData.columns = inData.columns.str.replace(" ", "")
     inData.to_sql("Rating", db, if_exists='replace', index=False)
 
+    db.execute('ALTER TABLE Product_Listings ADD COLUMN List_Date TEXT')
+    db.execute('UPDATE Product_Listings SET List_Date = ?;', [getCurrentDate()])
     db.commit()
     db.close()
 
@@ -293,6 +296,9 @@ def getFirstLastName(username):
     db.close()
     return ret
 
+
+def getCurrentDate():
+    return datetime.datetime.now()
 
 if __name__ == '__main__':
     app.run()
