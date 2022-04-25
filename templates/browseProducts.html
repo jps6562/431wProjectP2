@@ -15,16 +15,43 @@
     <div class="container-sm">
         <div class="card-body">
             <h2 class="card-title">Personal Data</h2>
-            <label for="category">Choose a category:</label>
-
-            <select name="category" id="category">
-                <option value="Root">All</option>
-                <option value="Clothing">Clothing</option>
-                <option value="Tops">Tops</option>
-                <option value="Bottoms">Bottoms</option>
-                <option value="Sleepwear">Sleepwear</option>
-                <option value="Bodysuits">Bodysuits</option>
-            </select>
+            <form action="/browseProducts" method="POST">
+                <div class="form-group">
+                    <label for="category">Choose a category:</label>
+                    <select name="category" id="category">
+                        <option value="Root">All</option>
+                        {% for i in result1 %}
+                        <option value= "{{ i }}">{{ i }}</option>
+                        {% endfor %}
+                    <!--
+                    <select name="category" id="category">
+                        <option value="Root">All</option>
+                        <option value="Clothing">Clothing</option>
+                        <option value="Tops">Tops</option>
+                        <option value="Bottoms">Bottoms</option>
+                        <option value="Sleepwear">Sleepwear</option>
+                        <option value="Bodysuits">Bodysuits</option>
+                        <option value="Long Sleeves">Long Sleeves</option>
+                        <option value="T-Shirts">T-Shirts</option>
+                        <option value="Pants">Pants</option>
+                        <option value="Skirts">Skirts</option>
+                        <option value="Jeans">Jeans</option>
+                        <option value="Bath Robes">Bath Robes</option>
+                        <option value="Electrical Supplies">Electrical Supplies</option>
+                        <option value="Cell Phones">Cell Phones</option>
+                        <option value="Tv & Home Theater">Tv & Home Theater</option>
+                        <option value="Wearable Technology">Wearable Technology</option>
+                        <option value="75-Inch Tvs">75-Inch Tvs</option>
+                        <option value="65-Inch Tvs">65-Inch Tvs</option>
+                        <option value="55-Inch Tvs">55-Inch Tvs</option>
+                        <option value="Apple Watch">Apple Watch</option>
+                        <option value="Headphones">Headphones</option>
+                        <option value="Wireless Headphones">Wireless Headphones</option>
+                        <option value="Beauty Products">Beauty Products</option> -->
+                    </select>
+                    <button type="submit" class="btn btn-primary">Enter</button>
+                </div>
+            </form>
             <table class="table table-dark">
                 <tr>
                     <th scope="col">Title</th>

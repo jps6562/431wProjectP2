@@ -15,7 +15,7 @@ currentUserNameGlobal = '0'
 @app.route('/')
 def mainPage():  # put application's code here
     popData()
-    print(len(getProductsInCategory('Cell Phones')))
+    #print(len(getProductsInCategory('Cell Phones')))
     return render_template('mainPage.html')
 
 
@@ -111,17 +111,41 @@ def productList():
 @app.route('/browseProducts', methods=['POST', 'GET'])
 def browseProducts():
     error = None
-    result = getProductsInCategory(category)
-    return render_template('browseProducts.html', error=error, result=result)
+    db = sql.connect('Phase2.db')
+    cursor = db.execute('SELECT DISTINCT c.category_name FROM CATEGORIES c')
+    result1 = cursor.fetchall()
+    newResult=[]
+    for thing in result1:
+        for thing1 in thing:
+            thing1 = thing1.replace(",", "")
+            thing1 = thing1.replace("'", "")
+            newValue = thing1
+        newResult.append((newValue))
+    #print(type(result1[0][0]))
+    #print(result1[0][0])
+    db.close()
+    if request.method == 'POST':
+        category = request.form['category']
+        print(category)
+        #print(category)
+        result = getProductsInCategory(category)
+        return render_template('browseProducts.html', error=error, result=result, result1=newResult)
+    else:
+        return render_template('browseProducts.html', error=error, result=getProductsInCategory('Root'), result1=newResult)
 
 
 def getProductsInCategory(category):
+    if category == 'Bodysuits':
+        category = 'bodysuit'
+    if category == 'Cooking Accessories':
+        category = 'Cooking accessories'
     cats = getCats(category)
+    #print(cats)
     db = sql.connect('Phase2.db')
     productList = []
     for cat in cats:
         cursor = db.execute('SELECT p.Title, p.Product_Name, p.Product_Description, p.Price, p.Category, '
-                            'p.Seller_Email FROM Product_Listings p WHERE p.Category = ?;', [cat])
+                            'p.Seller_Email FROM Product_Listings p WHERE p.Category = ? COLLATE nocase;', [cat])
         for thing in cursor.fetchall():
             productList.append(thing)
     db.close()
