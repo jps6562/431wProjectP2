@@ -18,7 +18,7 @@ def mainPage():  # put application's code here
     #print(len(getProductsInCategory('Cell Phones')))
     return render_template('mainPage.html')
 
-
+#asks for login info and verifies user
 @app.route('/login', methods=['POST', 'GET'])
 def login():
     error = None
@@ -35,7 +35,8 @@ def login():
             return render_template('unSuccLogin.html', error=error)
     return render_template('loginPage.html')
 
-
+#shows personal info and gives option for password change
+#verifies user entered correct password and also hashes it
 @app.route('/UserInfo', methods=['POST', 'GET'])
 def userInfo():
     error = None
@@ -60,13 +61,14 @@ def userInfo():
     else:
         return render_template('UserInfo.html', error=error, result=result)
 
-
+#Page for buyer options
 @app.route('/buyerPage', methods=['POST', 'GET'])
 def buyerPage():
     error = None
     return render_template('buyerPage.html', error=error, result=getFirstLastName(currentUserNameGlobal))
 
-
+#Page for seller actions
+#verifies that user is a valid seller
 @app.route('/sellerPage', methods=['POST', 'GET'])
 def sellerPage():
     error = None
@@ -76,7 +78,9 @@ def sellerPage():
     else:
         return render_template('noSeller.html', error=error)
 
-
+#Allows a seller to list a new product
+#gets necessary info and updates database
+#gives message whether it was successful
 @app.route('/productList', methods=['POST', 'GET'])
 def productList():
     error = None
@@ -107,14 +111,18 @@ def productList():
     else:
         return render_template('productList.html', error=error)
 
-
+# allows users to browse available products
+#result is products in the category
+#newResult is category selection
 @app.route('/browseProducts', methods=['POST', 'GET'])
 def browseProducts():
     error = None
+    #gets all possible categories for selection purposes
     db = sql.connect('Phase2.db')
     cursor = db.execute('SELECT DISTINCT c.category_name FROM CATEGORIES c')
     result1 = cursor.fetchall()
-    newResult=[]
+    newResult = []
+    #converts to strings
     for thing in result1:
         for thing1 in thing:
             thing1 = thing1.replace(",", "")
@@ -126,14 +134,16 @@ def browseProducts():
     db.close()
     if request.method == 'POST':
         category = request.form['category']
-        print(category)
+        #print(category)
         #print(category)
         result = getProductsInCategory(category)
         return render_template('browseProducts.html', error=error, result=result, result1=newResult)
     else:
         return render_template('browseProducts.html', error=error, result=getProductsInCategory('Root'), result1=newResult)
 
-
+# helper function to get products
+# takes the category for the products
+#clenses some database miss matches
 def getProductsInCategory(category):
     if category == 'Bodysuits':
         category = 'bodysuit'
@@ -151,6 +161,7 @@ def getProductsInCategory(category):
     db.close()
     return productList
 
+#recursive function to get category and its sub categories for getProducts function
 def getCats(category):
     cats = []
     cats.append(category)
@@ -163,6 +174,7 @@ def getCats(category):
     db.close()
     return cats
 
+#recursive helper function
 def getSubCats(db, cats):
     helperList = []
     for cat in cats:
@@ -171,7 +183,7 @@ def getSubCats(db, cats):
             helperList.append(thing[0])
     return helperList
 
-
+#verifies that it is a valid category for new product listing
 def categoryExists(category):
     db = sql.connect('Phase2.db')
     cursor = db.execute('SELECT COUNT(*) from Categories c where c.category_name = ? OR c.parent_category = ?;',
@@ -183,7 +195,7 @@ def categoryExists(category):
     else:
         return False
 
-
+#grabs the next listing id for new product listing
 def getNextListingId():
     db = sql.connect('Phase2.db')
     cursor = db.execute('SELECT MAX(p.Listing_ID) FROM Product_Listings p')
@@ -229,7 +241,7 @@ def getCCNum(username):
     db.close()
     return ret
 
-
+#function to verify that a seller does exist
 def sellerExist(username):
     db = sql.connect('Phase2.db')
     rowsReturned = db.execute('SELECT COUNT(*) FROM Sellers WHERE email = ? ;', [username]).fetchall()
@@ -239,7 +251,7 @@ def sellerExist(username):
     else:
         return False
 
-
+#function to verify that a user does exist and there password is correct
 def userExist(username, password):
     db = sql.connect('Phase2.db')
     hashPassword = hashPass(password)
@@ -251,7 +263,7 @@ def userExist(username, password):
     else:
         return False
 
-
+#populates data from csv
 def popData():
     db = sql.connect('Phase2.db')
 
@@ -353,7 +365,7 @@ def hashInData(pandaIn: pandas.DataFrame):
 def hashPass(pw):
     return hashlib.sha256(pw.encode()).hexdigest()
 
-
+#gets the name for a user
 def getFirstLastName(username):
     db = sql.connect('Phase2.db')
     cursor = db.execute('SELECT b.first_name, b.last_name from Buyers b where b.email = ?;', [username])
@@ -361,7 +373,7 @@ def getFirstLastName(username):
     db.close()
     return ret
 
-
+#creates a time stamp
 def getCurrentDate():
     return datetime.datetime.now()
 
